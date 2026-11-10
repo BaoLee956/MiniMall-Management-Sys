@@ -1,5 +1,9 @@
-import PosScreen from '../components/PosScreen';
+import AdminScreen from '@/components/AdminScreen';
 
-export default function Page() {
-  return <PosScreen />;
+export default function Home() {
+  return (
+    <main>
+      <AdminScreen />
+    </main>
+  );
 }

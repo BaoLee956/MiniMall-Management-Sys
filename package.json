@@ -5,7 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test:catalog": "node test/test-api.js",
+    "test:order": "node test/test-order.js",
+    "test": "node test/test-api.js && node test/test-order.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -31,11 +31,12 @@ Hệ thống Backend quản lý bán hàng và kho hàng cho chuỗi cửa hàng
 │   ├── product.routes.js           # Route /api/products
 │   ├── inventory.routes.js         # Route /api/inventory
 │   └── order.routes.js             # Route /api/orders
+├── test/
+│   ├── test-api.js                 # Script kiểm thử phân hệ Hàng hóa & Danh mục
+│   └── test-order.js               # Script kiểm thử phân hệ Bán hàng & Trừ kho
 ├── .env.example                    # Mẫu biến môi trường
 ├── package.json                    # Cấu hình dự án và dependencies
-├── server.js                       # Entry point máy chủ Express
-├── test-api.js                     # Script kiểm thử phân hệ Hàng hóa & Danh mục
-└── test-order.js                   # Script kiểm thử phân hệ Bán hàng & Trừ kho
+└── server.js                       # Entry point máy chủ Express
 ```
 
 ## Hướng dẫn cài đặt & khởi chạy
@@ -67,11 +68,17 @@ npm start
 
 ### 4. Kiểm thử API tự động
 
-- **Kiểm thử danh mục và sản phẩm:**
+- **Chạy toàn bộ kiểm thử:**
   ```bash
-  node test-api.js
+  npm test
   ```
-- **Kiểm thử đặt hàng, trừ tồn kho và rollback:**
+- **Kiểm thử riêng phân hệ danh mục và sản phẩm:**
   ```bash
-  node test-order.js
+  npm run test:catalog
+  # hoặc: node test/test-api.js
+  ```
+- **Kiểm thử riêng phân hệ đặt hàng, trừ tồn kho và rollback:**
+  ```bash
+  npm run test:order
+  # hoặc: node test/test-order.js
   ```

@@ -1,84 +1,86 @@
-# MiniMall Management System (MiniPOS Backend)
+# MiniMall Management System
 
-Hệ thống Backend quản lý bán hàng và kho hàng cho chuỗi cửa hàng tiện lợi MiniMall, được xây dựng trên nền tảng Node.js, Express và MongoDB (Mongoose).
+Hệ thống quản lý chuỗi cửa hàng tiện lợi MiniMall, bao gồm hai phân hệ chính:
+- **Backend:** Xây dựng bằng Node.js, Express và MongoDB Atlas.
+- **Frontend:** Giao diện ứng dụng người dùng (Thu ngân & Quản lý).
 
-## Công nghệ sử dụng
+---
 
-- **Runtime:** Node.js (ES6+ Modules)
-- **Framework:** Express.js
-- **Database:** MongoDB Atlas (Mongoose ODM)
-- **Transaction:** Mongoose Session with Multi-document ACID Transaction
-- **Kiểm thử API:** Native `fetch` (Node.js 18+)
-
-## Cấu trúc thư mục
+## Cấu trúc tổng thể dự án
 
 ```
-├── config/
-│   └── db.js                       # Cấu hình kết nối MongoDB Atlas
-├── controllers/
-│   ├── category.controller.js      # Xử lý danh mục sản phẩm
-│   ├── product.controller.js       # Xử lý hàng hóa sản phẩm
-│   ├── inventory.controller.js     # Xử lý nhập kho và FEFO
-│   └── order.controller.js         # Xử lý đơn hàng và trừ kho tự động
-├── models/
-│   ├── category.model.js           # Schema Categories
-│   ├── product.model.js            # Schema Products
-│   ├── inventory.model.js          # Schema Inventory (quản lý lô và hạn sử dụng)
-│   ├── order.model.js              # Schema Orders
-│   └── orderDetail.model.js        # Schema OrderDetails
-├── routes/
-│   ├── category.routes.js          # Route /api/categories
-│   ├── product.routes.js           # Route /api/products
-│   ├── inventory.routes.js         # Route /api/inventory
-│   └── order.routes.js             # Route /api/orders
-├── test/
-│   ├── test-api.js                 # Script kiểm thử phân hệ Hàng hóa & Danh mục
-│   └── test-order.js               # Script kiểm thử phân hệ Bán hàng & Trừ kho
-├── .env.example                    # Mẫu biến môi trường
-├── package.json                    # Cấu hình dự án và dependencies
-└── server.js                       # Entry point máy chủ Express
+.
+├── backend/                        # Toàn bộ mã nguồn máy chủ & API
+│   ├── config/                     # Cấu hình kết nối cơ sở dữ liệu
+│   │   └── db.js
+│   ├── controllers/                # Logic điều khiển cho từng phân hệ
+│   │   ├── category.controller.js
+│   │   ├── product.controller.js
+│   │   ├── inventory.controller.js
+│   │   └── order.controller.js
+│   ├── models/                     # Data Schema Mongoose
+│   │   ├── category.model.js
+│   │   ├── product.model.js
+│   │   ├── inventory.model.js
+│   │   ├── order.model.js
+│   │   └── orderDetail.model.js
+│   ├── routes/                     # Định tuyến API
+│   │   ├── category.routes.js
+│   │   ├── product.routes.js
+│   │   ├── inventory.routes.js
+│   │   └── order.routes.js
+│   ├── test/                       # Kịch bản kiểm thử tự động
+│   │   ├── test-api.js
+│   │   └── test-order.js
+│   ├── .env.example                # Mẫu biến môi trường Backend
+│   ├── package.json                # Dependencies & scripts của Backend
+│   └── server.js                   # Entry point của Express server
+│
+├── frontend/                       # Mã nguồn giao diện người dùng
+│   └── README.md
+│
+├── .gitignore                      # Cấu hình bỏ qua các tệp nhạy cảm
+└── README.md                       # Tài liệu tổng quan dự án
 ```
 
-## Hướng dẫn cài đặt & khởi chạy
+---
 
-### 1. Cài đặt dependencies
+## Hướng dẫn khởi chạy Backend
 
+### 1. Di chuyển vào thư mục Backend
+```bash
+cd backend
+```
+
+### 2. Cài đặt thư viện dependencies
 ```bash
 npm install
 ```
 
-### 2. Cấu hình biến môi trường
-
+### 3. Cấu hình biến môi trường
 Tạo file `.env` từ `.env.example`:
-
 ```env
 PORT=5000
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/minipos?retryWrites=true&w=majority
 ```
 
-### 3. Chạy máy chủ
-
+### 4. Khởi động Backend
 ```bash
-# Môi trường phát triển (tự reload khi đổi file)
+# Môi trường phát triển
 npm run dev
 
 # Môi trường chạy trực tiếp
 npm start
 ```
 
-### 4. Kiểm thử API tự động
+### 5. Chạy kiểm thử tự động
+```bash
+# Chạy toàn bộ các bài test
+npm test
 
-- **Chạy toàn bộ kiểm thử:**
-  ```bash
-  npm test
-  ```
-- **Kiểm thử riêng phân hệ danh mục và sản phẩm:**
-  ```bash
-  npm run test:catalog
-  # hoặc: node test/test-api.js
-  ```
-- **Kiểm thử riêng phân hệ đặt hàng, trừ tồn kho và rollback:**
-  ```bash
-  npm run test:order
-  # hoặc: node test/test-order.js
-  ```
+# Chạy riêng kiểm thử hàng hóa & danh mục
+npm run test:catalog
+
+# Chạy riêng kiểm thử đặt hàng, trừ tồn kho và rollback
+npm run test:order
+```

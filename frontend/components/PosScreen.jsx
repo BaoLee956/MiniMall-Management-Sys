@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
+import { Radio } from 'antd';
 
 const ReceiptTemplate = React.forwardRef(({ cart, totalAmount, date }, ref) => {
   return (
@@ -38,19 +39,20 @@ const ReceiptTemplate = React.forwardRef(({ cart, totalAmount, date }, ref) => {
           </tr>
         </thead>
         <tbody>
-          {cart.map((item) => (
-            <tr key={item._id} style={{ borderBottom: '1px dotted #ccc' }}>
-              <td style={{ padding: '4px 0', maxWidth: '140px', wordBreak: 'break-word' }}>
-                {item.name}
-              </td>
-              <td style={{ textAlign: 'center', padding: '4px 0' }}>
-                {item.quantity}
-              </td>
-              <td style={{ textAlign: 'right', padding: '4px 0' }}>
-                {(item.retailPrice * item.quantity).toLocaleString('vi-VN')} đ
-              </td>
-            </tr>
-          ))}
+          {cart &&
+            cart.map((item) => (
+              <tr key={item._id} style={{ borderBottom: '1px dotted #ccc' }}>
+                <td style={{ padding: '4px 0', maxWidth: '140px', wordBreak: 'break-word' }}>
+                  {item.name}
+                </td>
+                <td style={{ textAlign: 'center', padding: '4px 0' }}>
+                  {item.quantity}
+                </td>
+                <td style={{ textAlign: 'right', padding: '4px 0' }}>
+                  {(item.retailPrice * item.quantity).toLocaleString('vi-VN')} đ
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
 
@@ -66,7 +68,7 @@ const ReceiptTemplate = React.forwardRef(({ cart, totalAmount, date }, ref) => {
         }}
       >
         <span>Tổng tiền:</span>
-        <span>{totalAmount.toLocaleString('vi-VN')} đ</span>
+        <span>{(totalAmount || 0).toLocaleString('vi-VN')} đ</span>
       </div>
 
       <div style={{ borderBottom: '1px dashed #000', margin: '8px 0' }}></div>
@@ -85,16 +87,20 @@ ReceiptTemplate.displayName = 'ReceiptTemplate';
 export default function PosScreen() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
-  const [receiptDate, setReceiptDate] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('CASH');
+  const [lastOrderData, setLastOrderData] = useState(null);
   const componentRef = useRef(null);
 
   const handlePrint = useReactToPrint({
     contentRef: componentRef,
     documentTitle: 'Hoa_Don_MINIPOS',
-    onAfterPrint: () => {
-      setCart([]);
-    },
   });
+
+  const handlePrintReceipt = () => {
+    if (lastOrderData) {
+      handlePrint();
+    }
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -146,7 +152,7 @@ export default function PosScreen() {
 
     const orderPayload = {
       cashierId: '65a000000000000000000001',
-      paymentMethod: 'CASH',
+      paymentMethod,
       items: cart.map((item) => ({
         productId: item._id,
         quantity: item.quantity,
@@ -166,8 +172,14 @@ export default function PosScreen() {
       const result = await response.json();
 
       if (response.status === 201 || (response.ok && result.success)) {
-        setReceiptDate(new Date().toLocaleString('vi-VN'));
-        handlePrint();
+        setLastOrderData({
+          cart: [...cart],
+          totalAmount,
+          date: new Date().toLocaleString('vi-VN'),
+          paymentMethod,
+        });
+        setCart([]);
+        alert('Thanh toán thành công');
       } else {
         alert(`Lỗi thanh toán: ${result.message}`);
       }
@@ -307,7 +319,7 @@ export default function PosScreen() {
               justifyContent: 'space-between',
               fontSize: '20px',
               fontWeight: 'bold',
-              marginBottom: '20px',
+              marginBottom: '15px',
             }}
           >
             <span>Tổng tiền:</span>
@@ -315,31 +327,109 @@ export default function PosScreen() {
               {totalAmount.toLocaleString('vi-VN')} đ
             </span>
           </div>
-          <button
-            onClick={handleCheckout}
-            style={{
-              width: '100%',
-              padding: '15px',
-              backgroundColor: '#1890ff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              fontSize: '18px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-            }}
-          >
-            THANH TOÁN
-          </button>
+
+          <div style={{ marginBottom: '15px' }}>
+            <div style={{ fontWeight: 'bold', marginBottom: '8px', fontSize: '14px' }}>
+              Phương thức thanh toán:
+            </div>
+            <Radio.Group
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            >
+              <Radio value="CASH">Tiền mặt</Radio>
+              <Radio value="BANKING">Ngân hàng</Radio>
+              <Radio value="MOMO">Ví Momo</Radio>
+            </Radio.Group>
+          </div>
+
+          {paymentMethod === 'BANKING' && (
+            <div
+              style={{
+                textAlign: 'center',
+                marginBottom: '15px',
+                padding: '10px',
+                backgroundColor: '#fafafa',
+                borderRadius: '8px',
+                border: '1px solid #eee',
+              }}
+            >
+              <p style={{ margin: '0 0 8px', fontSize: '13px', fontWeight: 'bold' }}>
+                Quét mã VietQR để thanh toán:
+              </p>
+              <img
+                src={`https://img.vietqr.io/image/970436-123456789-compact2.png?amount=${totalAmount}&addInfo=ThanhToanDonHang`}
+                alt="VietQR"
+                style={{ width: '180px', height: 'auto', maxHeight: '180px', objectFit: 'contain' }}
+              />
+            </div>
+          )}
+
+          {paymentMethod === 'MOMO' && (
+            <div
+              style={{
+                textAlign: 'center',
+                marginBottom: '15px',
+                padding: '10px',
+                backgroundColor: '#fafafa',
+                borderRadius: '8px',
+                border: '1px solid #eee',
+              }}
+            >
+              <p style={{ margin: '0 0 8px', fontSize: '13px', fontWeight: 'bold' }}>
+                Quét mã Ví Momo để thanh toán:
+              </p>
+              <img
+                src="https://placehold.co/180x180?text=MOMO+QR"
+                alt="Momo QR"
+                style={{ width: '160px', height: '160px', objectFit: 'contain' }}
+              />
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={handleCheckout}
+              style={{
+                flex: 1,
+                padding: '14px',
+                backgroundColor: '#52c41a',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+              }}
+            >
+              Thanh Toán
+            </button>
+            <button
+              onClick={handlePrintReceipt}
+              disabled={!lastOrderData}
+              style={{
+                flex: 1,
+                padding: '14px',
+                backgroundColor: lastOrderData ? '#8c8c8c' : '#d9d9d9',
+                color: lastOrderData ? 'white' : '#8c8c8c',
+                border: 'none',
+                borderRadius: '5px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: lastOrderData ? 'pointer' : 'not-allowed',
+              }}
+            >
+              In Hóa Đơn
+            </button>
+          </div>
         </div>
       </div>
 
       <div style={{ display: 'none' }}>
         <ReceiptTemplate
           ref={componentRef}
-          cart={cart}
-          totalAmount={totalAmount}
-          date={receiptDate}
+          cart={lastOrderData ? lastOrderData.cart : []}
+          totalAmount={lastOrderData ? lastOrderData.totalAmount : 0}
+          date={lastOrderData ? lastOrderData.date : ''}
         />
       </div>
     </div>

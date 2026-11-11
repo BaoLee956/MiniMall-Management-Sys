@@ -8,12 +8,15 @@
     "dev": "node --watch server.js",
     "test:catalog": "node test/test-api.js",
     "test:order": "node test/test-order.js",
-    "test": "node test/test-api.js && node test/test-order.js"
+    "test:auth": "node test/test-auth.js",
+    "test": "node test/test-api.js && node test/test-order.js && node test/test-auth.js"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.9.5"
   }
 }

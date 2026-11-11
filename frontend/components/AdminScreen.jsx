@@ -193,7 +193,7 @@ export default function AdminScreen() {
         open={isModalOpen}
         onCancel={handleCloseModal}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form
           form={form}

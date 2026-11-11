@@ -3,13 +3,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 
-function ReceiptTemplate({ cart, totalAmount, date }) {
+const ReceiptTemplate = React.forwardRef(({ cart, totalAmount, date }, ref) => {
   return (
     <div
+      ref={ref}
       style={{
         width: '300px',
         padding: '16px',
-        fontFamily: 'Courier New, monospace',
+        fontFamily: 'Arial, Helvetica, sans-serif',
         color: '#000',
         backgroundColor: '#fff',
         fontSize: '12px',
@@ -18,103 +19,78 @@ function ReceiptTemplate({ cart, totalAmount, date }) {
       }}
     >
       <div style={{ textAlign: 'center', marginBottom: '12px' }}>
-        <h3 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 'bold' }}>
-          CỬA HÀNG TIỆN LỢI MINIMALL
+        <h3 style={{ margin: '0 0 4px', fontSize: '18px', fontWeight: 'bold' }}>
+          MINIPOS STORE
         </h3>
-        <p style={{ margin: 0, fontSize: '11px' }}>
-          123 Đường Số 1, Quận 1, TP. Hồ Chí Minh
-        </p>
-        <p style={{ margin: 0, fontSize: '11px' }}>Hotline: 1900 1234</p>
-        <div style={{ margin: '8px 0', borderBottom: '1px dashed #000' }}></div>
-        <h4 style={{ margin: '4px 0', fontSize: '14px', fontWeight: 'bold' }}>
-          HÓA ĐƠN BÁN LẺ
-        </h4>
-        <p style={{ margin: 0, fontSize: '11px' }}>
-          Thời gian: {date || new Date().toLocaleString('vi-VN')}
+        <p style={{ margin: 0, fontSize: '12px' }}>
+          Thời gian in: {date || new Date().toLocaleString('vi-VN')}
         </p>
       </div>
 
       <div style={{ borderBottom: '1px dashed #000', marginBottom: '8px' }}></div>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
         <thead>
           <tr style={{ borderBottom: '1px solid #000' }}>
-            <th style={{ textAlign: 'left', paddingBottom: '4px' }}>Món</th>
+            <th style={{ textAlign: 'left', paddingBottom: '4px' }}>Tên món</th>
             <th style={{ textAlign: 'center', paddingBottom: '4px' }}>SL</th>
-            <th style={{ textAlign: 'right', paddingBottom: '4px' }}>Đơn giá</th>
-            <th style={{ textAlign: 'right', paddingBottom: '4px' }}>T.Tiền</th>
+            <th style={{ textAlign: 'right', paddingBottom: '4px' }}>Giá</th>
           </tr>
         </thead>
         <tbody>
           {cart.map((item) => (
             <tr key={item._id} style={{ borderBottom: '1px dotted #ccc' }}>
-              <td style={{ padding: '4px 0', maxWidth: '120px', wordBreak: 'break-word' }}>
+              <td style={{ padding: '4px 0', maxWidth: '140px', wordBreak: 'break-word' }}>
                 {item.name}
               </td>
               <td style={{ textAlign: 'center', padding: '4px 0' }}>
                 {item.quantity}
               </td>
               <td style={{ textAlign: 'right', padding: '4px 0' }}>
-                {item.retailPrice.toLocaleString('vi-VN')}
-              </td>
-              <td style={{ textAlign: 'right', padding: '4px 0', fontWeight: 'bold' }}>
-                {(item.retailPrice * item.quantity).toLocaleString('vi-VN')}
+                {(item.retailPrice * item.quantity).toLocaleString('vi-VN')} đ
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <div style={{ margin: '8px 0', borderBottom: '1px dashed #000' }}></div>
+      <div style={{ borderBottom: '1px dashed #000', margin: '8px 0' }}></div>
 
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          fontSize: '13px',
+          fontSize: '16px',
           fontWeight: 'bold',
-          margin: '8px 0',
+          margin: '12px 0',
         }}
       >
-        <span>TỔNG TIỀN:</span>
+        <span>Tổng tiền:</span>
         <span>{totalAmount.toLocaleString('vi-VN')} đ</span>
-      </div>
-
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          fontSize: '11px',
-          marginBottom: '8px',
-        }}
-      >
-        <span>Hình thức:</span>
-        <span>Tiền mặt</span>
       </div>
 
       <div style={{ borderBottom: '1px dashed #000', margin: '8px 0' }}></div>
 
-      <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '11px' }}>
-        <p style={{ margin: '0 0 4px', fontWeight: 'bold' }}>
-          CẢM ƠN QUÝ KHÁCH & HẸN GẶP LẠI!
-        </p>
-        <p style={{ margin: 0, fontStyle: 'italic', fontSize: '10px' }}>
-          (Hóa đơn bán hàng kiêm phiếu bảo hành)
+      <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '12px' }}>
+        <p style={{ margin: 0, fontWeight: 'bold' }}>
+          Cảm ơn quý khách
         </p>
       </div>
     </div>
   );
-}
+});
+
+ReceiptTemplate.displayName = 'ReceiptTemplate';
 
 export default function PosScreen() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [receiptDate, setReceiptDate] = useState('');
-  const receiptRef = useRef(null);
+  const componentRef = useRef(null);
 
   const handlePrint = useReactToPrint({
-    contentRef: receiptRef,
-    documentTitle: 'Hoa_Don_MiniMall',
+    contentRef: componentRef,
+    documentTitle: 'Hoa_Don_MINIPOS',
     onAfterPrint: () => {
       setCart([]);
     },
@@ -189,7 +165,7 @@ export default function PosScreen() {
 
       const result = await response.json();
 
-      if (response.ok && result.success) {
+      if (response.status === 201 || (response.ok && result.success)) {
         setReceiptDate(new Date().toLocaleString('vi-VN'));
         handlePrint();
       } else {
@@ -358,10 +334,13 @@ export default function PosScreen() {
         </div>
       </div>
 
-      <div style={{ position: 'fixed', left: '-9999px', top: '-9999px' }}>
-        <div ref={receiptRef}>
-          <ReceiptTemplate cart={cart} totalAmount={totalAmount} date={receiptDate} />
-        </div>
+      <div style={{ display: 'none' }}>
+        <ReceiptTemplate
+          ref={componentRef}
+          cart={cart}
+          totalAmount={totalAmount}
+          date={receiptDate}
+        />
       </div>
     </div>
   );

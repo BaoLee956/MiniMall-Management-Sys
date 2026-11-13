@@ -11,7 +11,7 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Phương thức thanh toán là bắt buộc'],
       enum: {
-        values: ['CASH', 'CARD', 'TRANSFER'],
+        values: ['CASH', 'CARD', 'TRANSFER', 'BANKING', 'MOMO'],
         message: 'Phương thức thanh toán không hợp lệ',
       },
     },
